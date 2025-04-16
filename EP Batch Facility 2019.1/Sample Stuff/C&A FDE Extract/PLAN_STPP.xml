@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<PKBExportDefinition>
+  <SubdomainName>PLAN_STPP</SubdomainName>
+  <GlobalIDFormat>EUCLIDS</GlobalIDFormat>
+  <GlobalMeasurePrecision>2</GlobalMeasurePrecision>
+  <DimLevels>
+    <DimLevel>
+      <Dimension>CALENDAR</Dimension>
+      <ScopeLevel>QUARTER</ScopeLevel>
+      <OutputLevel>QUARTER</OutputLevel>
+    </DimLevel>
+    <DimLevel>
+      <Dimension>ORGANIZATION</Dimension>
+      <ScopeLevel>TOTAL_ORGANISATION</ScopeLevel>
+      <OutputLevel>TOTAL_ORGANISATION</OutputLevel>
+    </DimLevel>
+    <DimLevel>
+      <Dimension>PRODUCT</Dimension>
+      <ScopeLevel>CUSTOMER_SEGMENT</ScopeLevel>
+      <OutputLevel>CUSTOMER_SEGMENT</OutputLevel>
+    </DimLevel>
+  </DimLevels>
+  <Latest />
+  <RowOrdering>
+    <Dimension>CALENDAR<Order>ChronologicalAscending</Order></Dimension>
+    <Dimension>ORGANIZATION<Order>Ascending</Order></Dimension>
+    <Dimension>PRODUCT<Order>Ascending</Order></Dimension>
+  </RowOrdering>
+</PKBExportDefinition>

@@ -1,0 +1,12 @@
+{
+    "properties":{
+        "server.listener.config":"HTTP_Listener_config",
+        "server.http.host":"0.0.0.0",
+        "server.http.port":"9091",
+        "server.https.host":"0.0.0.0",
+        "server.https.port":"9092",
+        "server.https.tls.keyStore.path":"keystore.jks",
+        "server.https.tls.keyStore.password-secure":"changeme",
+        "server.https.tls.keyStore.key.password-secure":"changeme"
+    }
+}

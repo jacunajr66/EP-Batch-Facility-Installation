@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<EPBatchFacility>
+  <Credentials>
+    <Credential>
+      <ID>ext</ID>
+      <Password>LKCFIPcwKdc6MdS6uXJ5/Q==</Password>
+      <Encoding>AES</Encoding>
+    </Credential>
+  </Credentials>
+</EPBatchFacility>

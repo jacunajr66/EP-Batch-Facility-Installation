@@ -1,0 +1,140 @@
+'#  Copyright (c) 2003-2013 by JDA Software, Inc.
+'#==============================================================================
+
+' Version	Author		Date		Comments
+' 1.0		JDA		2017-10-30	Initial Creation
+
+'==============================================================================
+' Purpose:
+'    This script waits for a CTL file to arrive. It then un-compresses the corresponding DAT file
+'    and compares the number of records in the DAT file with the number specified in the CTL file.
+'    If the numbers match the DAT file is loaded into the corresponding staging table
+' Inputs:
+'    TYPE = STRUCTURE or FACT
+'    SOURCE = Optional parameter. If set to ADHOC then data will be loaded from the adhoc inbox
+'             otherwise data will be loaded from the regular inbox
+' Outputs:
+'    Return code
+'       1 = records were rejected but fewer than the threshold for failure
+'       0 = No errors
+'      -1 = Invalid arguments passed
+'      -2 = Control file did not arrive in time
+'      -3 = Error processing one or more files
+'==============================================================================
+<package>
+    <job id="load_to_staging">
+'    <?job debug="true"?>
+
+' =============================================================================
+'
+	<script language="VBScript" src=".\JdaPkbWshFunctions.vbs"></script>  
+	<script language="VBScript" src=".\sftp_support_global_variables.vbs"></script>
+	<script language="VBScript" src=".\sftp_support_global_functions.vbs"></script>  
+        
+' =============================================================================
+        <script language="VBScript">
+
+	CheckConsole
+
+	On Error Resume Next
+	
+	dim SCRIPTNAME
+	dim LOGFILE
+	
+	StartScript
+		
+	if WScript.Arguments.count < 1 then
+		LogError "Invalid number of arguments"
+		EndScript -1
+	end if
+	
+	loadType = WScript.Arguments(0)
+
+	
+	if StrComp(loadType,"STRUCTURE", vbTextCompare) <> 0 and StrComp(loadType, "S", vbTextCompare) <> 0 _
+	    and StrComp(loadType,"FACT", vbTextCompare) <> 0 and StrComp(loadType, "F", vbTextCompare) <> 0 _
+	    then
+		LogError "Type parameter must be S (STRUCTURE) or F (FACT)"
+		EndScript -1
+	end if
+
+        sqlLoadType = "APPEND"
+
+        if WScript.Arguments.count == 2 then
+		sqlLoadType = WScript.Arguments(1)
+	
+		if StrComp(sqlLoadType,"APPEND", vbTextCompare) <> 0 and StrComp(sqlLoadType,"TRUNCATE", vbTextCompare) <> 0  _
+	    	then
+			LogError "Type2 parameter must be 'APPEND' or 'TRUNCATE'"
+			EndScript -1
+		end if
+	end if
+
+	inputSource = INBOX_DIRECTORY
+	archiveDirectory = INBOX_ARCHIVE
+	logonCreds = LogonCredentials(loadType)
+	
+' =============================================================================	
+'	Wait for the control file to show up in the sftp inbox
+' =============================================================================
+	
+	errorCode = 0
+
+
+	if StrComp(loadType,"STRUCTURE", vbTextCompare) = 0 or StrComp(loadType, "S", vbTextCompare) = 0 then
+		controlFile = "STRUCTURE.CON"
+	else
+		controlFile = "FACT.CON"
+	end if
+
+
+	LogMessage "Checking for " & controlFile & " in " & inputSource
+
+	on error resume next
+	set objFolder = goFso.GetFolder(inputSource) 
+
+	
+	if Err.Number <> 0 then
+
+		errorCode = Err.Number
+		LogError "Unable to open directory " & inputSource
+	else
+		count = 0
+		fileFound = 0
+
+		do while (fileFound = 0)
+			for each objFile in objFolder.Files
+				if right(objFile,len(controlFile)) = controlFile then 
+					logMessage objFile & " found"
+					fileFound = 1
+					errorCode = ProcessControlFile(objFile, sqlLoadType)
+				
+					if errorCode <> 0 then
+						exit do
+					end if
+				end if 
+			next
+ 
+
+			if fileFound = 0 then
+				if count = INTERFACE_MAX_LOOPS Then 
+					logError controlFile & " did not arrive within time limit"
+					errorCode = -2
+					
+					exit do		
+				end if
+
+				WScript.Sleep INTERFACE_SLEEP_INTERVAL
+				count = count + 1
+			
+			end if
+		loop
+	
+	end if
+
+
+	EndScript errorCode
+
+        </script>
+    </job>
+</package>

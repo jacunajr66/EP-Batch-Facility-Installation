@@ -1,0 +1,11 @@
+{
+    "properties":{
+        "ji.db.host":"localhost",
+        "ji.db.port":"1521",
+        "ji.db.sid":"[database SID]",
+        "ji.db.driverClassName":"oracle.jdbc.OracleDriver",
+        "ji.db.driver":"jdbc:oracle:thin",
+        "ji.db.user":"ext",
+        "ji.db.password-secure":"ext"
+    }
+}

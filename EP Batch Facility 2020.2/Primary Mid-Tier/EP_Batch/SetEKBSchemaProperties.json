@@ -1,0 +1,14 @@
+{
+    "properties":{
+        "ep.ekbcsServer":"localhost",
+        "ep.soapServer":"localhost",
+        "ep.defaultCulture":"en-US",
+        "ep.db.host":"localhost",
+        "ep.db.port":"1521",
+        "ep.db.sid":"[database SID]",
+        "ep.db.driverClassName":"oracle.jdbc.OracleDriver",
+        "ep.db.driver":"jdbc:oracle:thin",
+        "ep.db.user":"ekb",
+        "ep.db.password-secure":"ekb"
+    }
+}

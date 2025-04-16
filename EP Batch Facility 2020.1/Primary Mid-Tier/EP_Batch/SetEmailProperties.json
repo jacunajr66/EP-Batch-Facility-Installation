@@ -1,0 +1,11 @@
+{
+    "properties":{
+        "email.enable":"false",
+        "email.emailsmtp.host":"smtp.jda.com",
+        "email.emailsmtp.port":"587",
+        "email.emailsmtp.user":"",
+        "email.emailsmtp.password-secure":"",
+        "email.emailaddress.fromaddress":"",
+        "email.emailaddress.toaddress":""
+    }
+}

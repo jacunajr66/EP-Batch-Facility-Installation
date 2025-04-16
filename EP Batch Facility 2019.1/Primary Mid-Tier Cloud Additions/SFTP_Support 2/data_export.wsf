@@ -1,0 +1,137 @@
+'#  Copyright (c) 2003-2013 by JDA Software, Inc.
+'#==============================================================================
+
+' Version	Author		Date		Comments
+' 1.0		JDA		2017-10-30	Initial Creation
+
+'==============================================================================
+' Purpose:
+'    Export EKB data
+' Inputs:
+'    any xml files present in the EXPORT_XML_DIRECTORY directory   
+' Outputs:
+'    Return code
+'       0     = No errors
+'      -1     = Unable to access EXPORT_XML_DIRECTORY
+'       other = Error code from sql process
+'    Output Files
+'       One output file will be generated with a TAB extension for each xml file in EXPORT_DIRECTORY, 
+'       these files will be compressed
+'       One FMT file will be created for each TAB file
+'       One CON file will be created which lists all the TAB files generated and the number of lines
+'       in each
+'==============================================================================
+<package>
+    <job id="data_export">
+'    <?job debug="true"?>
+
+' =============================================================================
+'
+	<script language="VBScript" src=".\JdaPkbWshFunctions.vbs"></script>  
+	<script language="VBScript" src=".\sftp_support_global_variables.vbs"></script>
+	<script language="VBScript" src=".\sftp_support_global_functions.vbs"></script>  
+        
+' =============================================================================
+        <script language="VBScript">
+
+	CheckConsole
+
+	On Error Resume Next
+	
+	dim SCRIPTNAME
+	dim LOGFILE
+	
+	StartScript
+	
+	timeStamp = GetTimestamp
+
+'	controlFile = EXPORT_DIRECTORY & timeStamp & "_EXPORTS.CON"
+
+	controlFile = EXPORT_DIRECTORY & "EXPORTS.CON"
+
+' =============================================================================	
+'	Loop through all the xml files in the EXPORT_XML_DIRECTORY
+' =============================================================================
+	
+	set objFolder = goFso.GetFolder(EXPORT_XML_DIRECTORY) 
+	
+	if Err.Number <> 0 then
+		LogError "Unable to open directory " & EXPORT_XML_DIRECTORY
+		EndScript -1
+	end if
+	
+	
+	if objFolder.Files.Count = 0 then
+		LogMessage "There are no files in " & EXPORT_XML_DIRECTORY
+		EndScript 0
+	end if
+	
+	ANYERRCODE=0
+	filesProcessed=false
+	
+	for each xmlFile in objFolder.Files
+		
+		if StrComp(right(xmlFile,3),"XML", vbTextCompare) = 0 then 
+			
+			filesProcessed=true
+			
+' =============================================================================	
+'			Perform the data extract
+' =============================================================================
+			
+			LogMessage ""
+			LogMessage "Processing " & xmlFile
+			
+			filenameBody = Right(xmlFile, Len(xmlFile)-InStrRev(xmlFile,"\"))
+			filenameBody = Left(filenameBody, Len(filenameBody)-4)
+			
+'			outputFile=EXPORT_DIRECTORY & timeStamp & "_" & filenameBody & ".TAB"
+'			formatFile=EXPORT_DIRECTORY & timeStamp & "_" & filenameBody & ".FMT"
+
+			outputFile=EXPORT_DIRECTORY & filenameBody & ".TAB"
+			formatFile=EXPORT_DIRECTORY & filenameBody & ".FMT"
+			
+			LogMessage "Generating " & outputFile
+			
+			set oExec = ExecCmdWithLogging("pkbfdatexp / " & xmlFile & " " & outputFile & " FMTFILE=" & formatFile, true)
+			ERRCODE=oExec.ExitCode 
+			if ERRCODE <> 0 then
+				LogError "Data extract for " & outputFile & " failed with error code " & ERRCODE
+				ANYERRCODE=ERRCODE
+			else
+
+				numberOfLines = LineCount(outputFile)
+				
+' =============================================================================	
+'				Compress the extracted file
+' =============================================================================
+				
+				LogMessage "Compressing " & outputFile
+				CompressFile(outputFile)
+
+' =============================================================================	
+'				Update the CON file
+' =============================================================================
+				
+				LogMessage "Updating control file"
+				set objConFile = goFso.OpenTextFile(controlFile,ForAppending,true) ' create file if it doesn't exist
+				if Err.Number <> 0 then
+					LogError "Unable to open control file " & controlFile
+				end if
+				objConFile.WriteLine outputFile & "," & numberOfLines
+				objConFile.Close
+				
+				LogMessage "Successfully processed " & xmlFile
+			end if
+		end if
+	next 
+	
+	if filesProcessed = false then
+		LogMessage "No XML files found in " & EXPORT_XML_DIRECTORY
+	end if
+
+	EndScript 0
+	
+        </script>
+    </job>
+</package>

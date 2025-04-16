@@ -1,0 +1,10 @@
+{    
+    "properties":{
+        "eframework.applicationId":"JI for EP",
+        "eframework.errorReport.enabled":"false",
+        "eframework.errorReport.htmlTemplatePath":"errorReportTemplate.html",
+        "eframework.errorReport.errorReportPath":"",
+        "eframework.errorReport.title":"JI 1.0 Error report",
+        "eframework.errorReport.payload.transaction.size":"2048"
+    }
+}

@@ -1,0 +1,69 @@
+'#  Copyright (c) 2003-2013 by JDA Software, Inc.
+'#==============================================================================
+
+' Version	Author		Date		Comments
+' 1.0		JDA		2017-10-30	Initial Creation
+
+'==============================================================================
+' Purpose:
+'    Delete old files from archive, logs and export directories
+' Inputs:
+'    None
+' Outputs:
+'    Return code
+
+'==============================================================================
+<package>
+    <job id="purge_old_files">
+'    <?job debug="true"?>
+
+' =============================================================================
+'
+	<script language="VBScript" src=".\JdaPkbWshFunctions.vbs"></script>  
+	<script language="VBScript" src=".\sftp_support_global_variables.vbs"></script>
+	<script language="VBScript" src=".\sftp_support_global_functions.vbs"></script>  
+        
+' =============================================================================
+        <script language="VBScript">
+
+	CheckConsole
+
+	on error resume next
+	
+	dim SCRIPTNAME
+	dim LOGFILE
+	
+	StartScript
+
+' =============================================================================
+'	Purge old log files
+' =============================================================================
+	
+	LogMessage ""
+ 	LogMessage "Purging logfiles older than " & LOG_RETENTION & " days from " & LOG_DIRECTORY 
+	LogMessage ""
+	PurgeFiles LOG_DIRECTORY, LOG_RETENTION
+	
+' =============================================================================
+'	Purge old archive files
+' =============================================================================
+	
+	LogMessage ""
+ 	LogMessage "Purging archived files older than " & ARCHIVE_RETENTION & " days from " & INBOX_ARCHIVE 
+	LogMessage ""
+	PurgeFiles INBOX_ARCHIVE, ARCHIVE_RETENTION
+	
+' =============================================================================
+'	Purge old export files
+' =============================================================================
+	
+	LogMessage ""
+ 	LogMessage "Purging export files older than " & EXPORT_RETENTION & " days from " & EXPORT_DIRECTORY 
+	LogMessage ""
+	PurgeFiles EXPORT_DIRECTORY, EXPORT_RETENTION
+	
+	EndScript 0
+	
+        </script>
+    </job>
+</package>
